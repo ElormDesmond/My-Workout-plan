@@ -1,0 +1,113 @@
+body {
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  color: #f8f9fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.navbar {
+  border-radius: 0 0 1rem 1rem;
+}
+
+main.container {
+  max-width: 900px;
+}
+
+.card {
+  background: #232526;
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  margin-bottom: 1.5rem;
+}
+
+.card .btn {
+  border-radius: 2rem;
+}
+
+.progress {
+  height: 1.5rem;
+  border-radius: 1rem;
+  background: #343a40;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+  font-weight: bold;
+}
+
+.chart-container {
+  background: #232526;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+#calendar-section .row {
+  row-gap: 1.5rem;
+}
+
+.spotify-embed {
+  border-radius: 1rem;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.modal-content {
+  background: #232526;
+  color: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  border: 2px solid #00c6ff;
+}
+.modal-header, .modal-footer {
+  border: none;
+}
+#workout-modal-body {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #e0e6ed;
+  background: linear-gradient(135deg, #232526 60%, #0072ff 100%);
+  border-radius: 1rem;
+  padding: 1.2rem 1rem;
+  box-shadow: 0 2px 12px rgba(0,198,255,0.08);
+}
+#workout-modal-body ul {
+  list-style: disc inside;
+  margin-bottom: 0.5rem;
+}
+#workout-modal-body .quote {
+  font-size: 1.1rem;
+  color: #00c6ff;
+  font-style: italic;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+footer {
+  background: none;
+  color: #00c6ff;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.card img.img-fluid.rounded {
+  object-fit: cover;
+  width: 100%;
+  min-height: 120px;
+  max-height: 180px;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0,198,255,0.12);
+}
+
+@media (max-width: 600px) {
+  main.container {
+    padding: 0 0.5rem;
+  }
+  .chart-container {
+    padding: 1rem;
+  }
+}
