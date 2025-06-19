@@ -311,13 +311,49 @@ function renderCalendar() {
 }
 
 function getWorkoutDetailsWithQuote(details, weekIdx, dayIdx, type) {
+  // Set sets/reps/time by phase/month
+  let sets, reps, time;
+  if (weekIdx < 8) { // Months 1-2
+    sets = 3; reps = '8-12'; time = '20-45s';
+  } else if (weekIdx < 21) { // Months 3-5
+    sets = 4; reps = '10-15'; time = '30-60s';
+  } else { // Months 6-12
+    sets = 5; reps = '12-20'; time = '45-90s';
+  }
+  const timeExercises = /plank|wall sit|hold|stretch|recovery|yoga|foam rolling|handstand|planche|human flag|l-sit|superman|meditation|mobility|rest|circuit|breathe|bent knees|broad jump/i;
+  const perSideExercises = /single-leg|single arm|one-arm|one arm|archer|lunge|lunges|split squat|side lunge|curtsy lunge|cossack|hip thrust|deadlift|wall sit.*leg|planche.*arm|push-up.*arm|push up.*arm|bicep curl.*arm|tricep extension.*arm|shoulder press.*arm|row.*arm|bound.*dir|side plank|calf raise.*leg|glute bridge.*leg|leg raise.*leg|leg lift.*leg|leg curl.*leg|leg extension.*leg|broad jump.*leg|jump.*leg|step up.*leg|kickback.*leg|kick.*leg|arm raise.*arm|arm circle.*arm/i;
+  const boxingExercises = /boxing|jab|cross|punch|sprawl|jump rope/i;
   const quote = animeQuotes[(weekIdx + dayIdx) % animeQuotes.length];
   let mudra = null, meditation = '';
   if (!/rest|recovery/i.test(type)) {
     mudra = mudras[(weekIdx + dayIdx) % mudras.length];
-    meditation = `<div class='mt-3'><strong>Meditation:</strong> 5-10 min mindful breathing.<br><strong>Mudra:</strong> <span title='${mudra.desc}'><i class='fa-solid ${mudra.icon} ${mudra.color} fa-lg me-1'></i>${mudra.name}</span> <span class='text-info'>(${mudra.benefit})</span></div>`;
+    // Suggest a meditation song for this mudra
+    const song = mudraMeditationSongs[(weekIdx + dayIdx) % mudraMeditationSongs.length];
+    meditation = `<div class='mt-3'><strong>Meditation:</strong> 5-10 min mindful breathing.<br><strong>Mudra:</strong> <span title='${mudra.desc}'><i class='fa-solid ${mudra.icon} ${mudra.color} fa-lg me-1'></i>${mudra.name}</span> <span class='text-info'>(${mudra.benefit})</span><br><strong>Recommended Song:</strong> <a href='${song.spotify}' target='_blank'><i class='fa-brands fa-spotify text-success'></i> ${song.name}</a><br><span class='text-secondary small'>${song.desc}</span></div>`;
   }
-  return `<ul>${details.map(d => `<li>3 sets of 1-12 reps - ${d.replace(/\d+x[\d-]+/, '').replace(/3x[\d-]+/, '').replace(/4x[\d-]+/, '').replace(/- /, '').trim()}</li>`).join('')}</ul><div class='quote'>"${quote}"</div>${meditation}`;
+  return `<ul>${details.map(d => {
+    if (boxingExercises.test(d)) {
+      // For boxing, show duration instead of reps/sets
+      let boxingTime = weekIdx < 8 ? '2-3 min' : weekIdx < 21 ? '3-4 min' : '4-5 min';
+      return `<li><strong>Boxing/Cardio:</strong> ${d.replace(/- .*/, '').trim()} - <span class='text-info'>${boxingTime} continuous</span></li>`;
+    } else if (timeExercises.test(d)) {
+      let customTime = d.match(/\d{1,3}-?\d{0,3}?s/);
+      let displayTime = customTime ? customTime[0] : time;
+      if (perSideExercises.test(d)) {
+        return `<li>${sets} sets of ${displayTime} <strong>per side</strong> - ${d.replace(/\d+x[\d-]+/, '').replace(/\d{1,3}-?\d{0,3}?s/, '').replace(/- /, '').trim()} (<span class='text-info'>left</span> & <span class='text-info'>right</span>)</li>`;
+      } else {
+        return `<li>${sets} sets of ${displayTime} - ${d.replace(/\d+x[\d-]+/, '').replace(/\d{1,3}-?\d{0,3}?s/, '').replace(/- /, '').trim()}</li>`;
+      }
+    } else {
+      let customReps = d.match(/\d{1,2}-?\d{0,2}/);
+      let displayReps = customReps ? customReps[0] : reps;
+      if (perSideExercises.test(d)) {
+        return `<li>${sets} sets of ${displayReps} reps <strong>per side</strong> - ${d.replace(/\d+x[\d-]+/, '').replace(/\d{1,2}-?\d{0,2}/, '').replace(/- /, '').trim()} (<span class='text-info'>left</span> & <span class='text-info'>right</span>)</li>`;
+      } else {
+        return `<li>${sets} sets of ${displayReps} reps - ${d.replace(/\d+x[\d-]+/, '').replace(/\d{1,2}-?\d{0,2}/, '').replace(/- /, '').trim()}</li>`;
+      }
+    }
+  }).join('')}</ul><div class='quote'>"${quote}"</div>${meditation}`;
 }
 
 function showWorkoutModal(e) {
@@ -517,32 +553,116 @@ function renderTips() {
 }
 
 function getMonthTips(month) {
-  // Example: generate 3-4 tips per month, tailored to the phase
-  if (month <= 2) return [
-    'Master the basics and focus on perfect form.',
-    'Build a consistent workout habit.',
-    'Track your progress from day one.',
-    'Don’t skip warm-ups and cool-downs.'
+  // Unique, phase-appropriate, non-repeating motivational tips for each month
+  const tips = [
+    [
+      'Start with the basics and focus on perfect form.',
+      'Build a consistent workout habit—show up every day.',
+      'Track your progress with photos and notes.',
+      'Celebrate every small win to build momentum.'
+    ],
+    [
+      'Push yourself to add 1-2 reps each week.',
+      'Try a new exercise variation to challenge your body.',
+      'Stay disciplined—consistency beats intensity.',
+      'Warm up and cool down to prevent injury.'
+    ],
+    [
+      'Increase your sets or add a new movement this month.',
+      'Visualize your goal physique every morning.',
+      'Share your progress with a friend for accountability.',
+      'Focus on quality reps, not just quantity.'
+    ],
+    [
+      'Master a new skill (e.g., handstand, pistol squat).',
+      'Reflect on your journey so far and set a new goal.',
+      'Help someone else get started with calisthenics.',
+      'Stay humble and keep learning.'
+    ],
+    [
+      'Try a full-body circuit for a new challenge.',
+      'Add a new mudra or meditation to your routine.',
+      'Push through plateaus by changing exercise order.',
+      'Remember: progress is not always linear.'
+    ],
+    [
+      'Focus on advanced movements and skill work.',
+      'Celebrate visible progress and muscle definition.',
+      'Keep your motivation high with new goals.',
+      'Share your progress for accountability.'
+    ],
+    [
+      'Perfect your form and advanced skills.',
+      'Reflect on your journey and set new targets.',
+      'Help others get started with calisthenics.',
+      'Stay humble and keep learning.'
+    ],
+    [
+      'Increase your workout intensity this month.',
+      'Try a new mudra for focus and energy.',
+      'Take a deload week if you feel fatigued.',
+      'Visualize your success before every session.'
+    ],
+    [
+      'Push for a personal best in your favorite exercise.',
+      'Incorporate more mobility work for longevity.',
+      'Find a new workout partner for extra motivation.',
+      'Remind yourself why you started.'
+    ],
+    [
+      'Try a new training split for variety.',
+      'Add a new challenge: longer planks, deeper squats.',
+      'Celebrate your discipline, not just your results.',
+      'Stay patient—greatness takes time.'
+    ],
+    [
+      'Reflect on your year of progress.',
+      'Set a new, ambitious goal for the next 12 months.',
+      'Share your transformation story to inspire others.',
+      'Thank yourself for never giving up.'
+    ],
+    [
+      'You are now your own hero—keep going.',
+      'Mentor someone new to calisthenics.',
+      'Keep evolving: there is always another level.',
+      'Remember: you always have a choice.'
+    ]
   ];
-  if (month <= 5) return [
-    'Increase reps or difficulty as you get stronger.',
-    'Try new exercise variations for challenge.',
-    'Stay disciplined with your schedule.',
-    'Push for progressive overload.'
-  ];
-  if (month <= 8) return [
-    'Focus on advanced movements and skill work.',
-    'Celebrate visible progress and muscle definition.',
-    'Keep your motivation high with new goals.',
-    'Share your progress for accountability.'
-  ];
-  return [
-    'Perfect your form and advanced skills.',
-    'Reflect on your journey and set new targets.',
-    'Help others get started with calisthenics.',
-    'Stay humble and keep learning.'
-  ];
+  return tips[month-1];
 }
+
+const mudraMeditationSongs = [
+  {
+    name: 'Weightless – Marconi Union',
+    spotify: 'https://open.spotify.com/track/7yCPwWs66K8Ba5lFuU2bcx',
+    desc: 'Scientifically shown to reduce anxiety and promote deep relaxation.'
+  },
+  {
+    name: 'Matsya – Anoushka Shankar',
+    spotify: 'https://open.spotify.com/track/2QZ7WLBE8h2y1Y5Fb8RYbH',
+    desc: 'Soothing sitar and ambient textures for mindful breathing.'
+  },
+  {
+    name: 'Sunset Lover – Petit Biscuit',
+    spotify: 'https://open.spotify.com/track/1rfofaqEpACxVEHIZBJe6W',
+    desc: 'Gentle electronic instrumental, perfect for calm focus.'
+  },
+  {
+    name: 'Bloom – ODESZA',
+    spotify: 'https://open.spotify.com/track/2takcwOaAZWiXQijPHIx7B',
+    desc: 'Uplifting, meditative electronic soundscape.'
+  },
+  {
+    name: 'Night Owl – Gerry Mulligan',
+    spotify: 'https://open.spotify.com/track/3AJwUDP919kvQ9QcozQPxg',
+    desc: 'Smooth jazz for a peaceful, mindful state.'
+  },
+  {
+    name: 'Weightless, Pt. 2 – Marconi Union',
+    spotify: 'https://open.spotify.com/track/1AhDOtG9vPSOmsWgNW0BEY',
+    desc: 'A continuation of the most relaxing song, ideal for meditation.'
+  }
+];
 
 // --- Navigation ---
 function showSection(section) {
@@ -565,7 +685,20 @@ document.getElementById('nav-tips').addEventListener('click', e => {
 });
 
 // --- Initial Render ---
-renderCalendar();
-renderProgress();
-renderTips();
-showSection('calendar-section');
+document.addEventListener('DOMContentLoaded', function() {
+  renderCalendar();
+  renderProgress();
+  renderTips();
+  showSection('calendar-section');
+  document.getElementById('nav-calendar').addEventListener('click', e => {
+    showSection('calendar-section');
+  });
+  document.getElementById('nav-progress').addEventListener('click', e => {
+    renderProgress();
+    showSection('progress-section');
+  });
+  document.getElementById('nav-tips').addEventListener('click', e => {
+    renderTips();
+    showSection('tips-section');
+  });
+});
